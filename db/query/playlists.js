@@ -49,14 +49,34 @@ export async function updatePlaylist(id, fields) {
 
   return playlist;
 }
+export async function getPlaylists({ page, limit, userId }) {
+  const whereClauses = [];
+  const params = [];
+  let pagination = ``;
 
-export async function getPlaylists(userId) {
+  if (userId) {
+    params.push(userId);
+    whereClauses.push(`(owner_id = $${params.length} OR is_public = true)`);
+  } else {
+    whereClauses.push(`is_public = true`);
+  }
+
+  if (page && limit) {
+    const offset = (page - 1) * limit;
+
+    params.push(limit, offset); // order matters: LIMIT first, then OFFSET
+    pagination = `LIMIT $${params.length - 1} OFFSET $${params.length}`;
+  }
+
   const SQL = `
     SELECT * FROM playlists
-    WHERE owner_id = $1
-    `;
+    WHERE ${whereClauses.join(" AND ")}
+    ${pagination}
+  `;
 
-  const { rows } = await db.query(SQL, [userId]);
+  console.log(SQL, params);
+
+  const { rows } = await db.query(SQL, params);
 
   return rows;
 }

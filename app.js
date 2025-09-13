@@ -5,13 +5,19 @@ import usersRouter from "#api/usersRouter";
 import playlistRouter from "#api/playlistRouter";
 import songsRouter from "#api/songsRouter";
 import artistsRouter from "#api/artistsRouter";
+import albumRouter from "#api/albumRouter";
 import { search } from "#db/query/search";
 import requireBody from "#middleware/requireBody";
 import getUserFromToken from "#middleware/getUserFromToken";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -21,6 +27,7 @@ app.use(getUserFromToken);
 app.use("/users", usersRouter);
 app.use("/playlists", playlistRouter);
 app.use("/songs", songsRouter);
+app.use("/albums", albumRouter);
 app.use("/artists", artistsRouter);
 
 app.get("/", (req, res) => {

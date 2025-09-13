@@ -50,12 +50,13 @@ export async function updateAlbum(id, fields) {
   return album;
 }
 
-export async function getAlbums() {
+export async function getAlbums({ page = 1, limit = 10 }) {
   const SQL = `
     SELECT * FROM albums
+    LIMIT $1 OFFSET $2
     `;
 
-  const { rows } = await db.query(SQL);
+  const { rows } = await db.query(SQL, [limit, (page - 1) * limit]);
 
   return rows;
 }
